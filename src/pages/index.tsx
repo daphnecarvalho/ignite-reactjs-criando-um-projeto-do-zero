@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
-import { BiCalendarAlt, BiUser } from 'react-icons/bi';
+import { FiCalendar, FiUser } from 'react-icons/fi';
 import { getPrismicClient } from '../services/prismic';
 
 import commonStyles from '../styles/common.module.scss';
@@ -71,17 +71,17 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
         <div className={commonStyles.postsContainer}>
           {posts.map(post => (
             <article className={styles.post}>
-              <Link key={post.uid} href={`/posts/${post.uid}`}>
+              <Link key={post.uid} href={`/post/${post.uid}`}>
                 <a>
                   <strong>{post.data.title}</strong>
                   <p>{post.data.subtitle}</p>
                   <div>
                     <time>
-                      <BiCalendarAlt />
+                      <FiCalendar />
                       <span>{post.first_publication_date}</span>
                     </time>
                     <span>
-                      <BiUser />
+                      <FiUser />
                       <span>{post.data.author}</span>
                     </span>
                   </div>

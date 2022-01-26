@@ -1,1 +1,74 @@
-// TODO
+.banner {
+  width: 100vw;
+  height: 400px;
+}
+
+.mainContainer {
+  max-width: 720px;
+  margin: 0 auto;
+  margin-top: 4rem;
+
+  h1 {
+    font-size: 3rem;
+    color: var(--gray-100);
+  }
+
+  h1 + div {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    color: var(--gray-250);
+    margin-top: 0.75rem;
+    margin-bottom: 3rem;
+
+    time, span {
+      display: contents;
+      align-items: center;
+      justify-content: flex-start;
+
+      text-align: center;
+      justify-content: center;
+      display: contents;
+      text-transform: capitalize;
+
+      & span {
+        font-size: 0.8rem;
+      }
+
+      & svg {
+        margin-right: 0.275rem;
+      }
+    }
+
+    span svg,
+    span + time svg {
+      margin-left: 2rem;
+    }
+  }
+
+  article {
+    h2 {
+      font-size: 1.75rem;
+      margin-top: 3rem;
+      margin-bottom: 2rem;
+      color: var(--gray-100);
+
+      & + div {
+        color: var(--gray-200);
+        font-size: 1rem;
+
+        p, li {
+          margin: 1rem 0;
+        }
+
+        a {
+          color: var(--pink-500);
+
+          &:hover {
+            filter: brightness(0.9);
+          }
+        }
+      }
+    }
+  }
+}

@@ -58,6 +58,8 @@
       }
     }
 
+    transition: color 0.2s;
+
     &:hover strong {
       color: var(--pink-500);
     }
