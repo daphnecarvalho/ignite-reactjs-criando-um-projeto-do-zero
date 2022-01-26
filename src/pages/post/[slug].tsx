@@ -2,7 +2,7 @@ import { GetStaticPaths, GetStaticProps } from 'next';
 
 import Head from 'next/head';
 import { RichText } from 'prismic-dom';
-import { format } from 'date-fns';
+import { format, minutesToHours } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import { FiCalendar, FiUser, FiClock } from 'react-icons/fi';
 import Prismic from '@prismicio/client';
@@ -31,6 +31,13 @@ interface Post {
   };
 }
 
+interface Content {
+  heading: string;
+  body: {
+    text: string;
+  }[];
+}
+
 interface PostProps {
   post: Post;
 }
@@ -41,14 +48,32 @@ export default function Post({ post }: PostProps): JSX.Element {
     return <h1>Carregando...</h1>;
   }
 
-  const totalWords = post.data.content.reduce((total, contentItem) => {
-    total += contentItem.heading.split(' ').length;
-    const words = contentItem.body.map(item => item.text.split(' ').length);
-    words.map(word => (total += word));
+  function calculateReadingTime(content: Content[]): string {
+    const getHeadingWordsPerMinutes = content.reduce((acc, currentValue) => {
+      if (currentValue.heading !== null) {
+        return currentValue.heading.split(/\s+/).length + acc;
+      }
+      return acc;
+    }, 0);
 
-    return total;
-  }, 0);
-  const readTime = Math.ceil(totalWords / 200);
+    const getBodyWordsPerMinutes = content.reduce((acc, currentValue) => {
+      return RichText.asText(currentValue.body).split(/\s+/).length + acc;
+    }, 0);
+
+    const getWordsPerMinutes = Math.ceil(
+      (getHeadingWordsPerMinutes + getBodyWordsPerMinutes) / 200
+    );
+
+    if (getWordsPerMinutes < 1) {
+      return 'Rápida leitura';
+    }
+
+    if (getWordsPerMinutes < 60) {
+      return `${getWordsPerMinutes} min`;
+    }
+
+    return `${minutesToHours(getWordsPerMinutes)} horas`;
+  }
 
   return (
     <>
@@ -56,35 +81,47 @@ export default function Post({ post }: PostProps): JSX.Element {
         <title>{post.data.title} | spacetraveling</title>
       </Head>
 
-      <img src={post.data.banner.url} alt="imagem" className={styles.banner} />
+      {post.data.banner && (
+        <img
+          className={styles.banner}
+          src={post.data.banner.url}
+          alt="banner"
+        />
+      )}
 
       <main className={styles.mainContainer}>
         <article className={commonStyles.postsContainers}>
-          <h1>{post.data.title}</h1>
-          <div>
-            <time>
-              <FiCalendar />
+          <header>
+            <h1>{post.data.title}</h1>
+            <div>
+              <time>
+                <FiCalendar size={20} />
+                <span>
+                  {String(
+                    format(
+                      new Date(post.first_publication_date),
+                      'dd MMM yyyy',
+                      {
+                        locale: ptBR,
+                      }
+                    )
+                  )}
+                </span>
+              </time>
               <span>
-                {String(
-                  format(new Date(post.first_publication_date), 'dd MMM yyyy', {
-                    locale: ptBR,
-                  })
-                )}
+                <FiUser size={20} />
+                <span>{post.data.author}</span>
               </span>
-            </time>
-            <span>
-              <FiUser />
-              <span>{post.data.author}</span>
-            </span>
-            <time>
-              <FiClock />
-              <span>{`${readTime} min`}</span>
-            </time>
-          </div>
+              <time>
+                <FiClock size={20} />
+                <span>{calculateReadingTime(post.data.content)}</span>
+              </time>
+            </div>
+          </header>
 
           {post.data.content.map(content => {
             return (
-              <article key={content.heading}>
+              <section key={content.heading}>
                 <h2>{content.heading}</h2>
                 <div
                   className={styles.postContent}
@@ -93,7 +130,7 @@ export default function Post({ post }: PostProps): JSX.Element {
                     __html: RichText.asHtml(content.body),
                   }}
                 />
-              </article>
+              </section>
             );
           })}
         </article>
@@ -118,16 +155,15 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
   return {
     paths,
-    fallback: 'blocking',
+    fallback: true,
   };
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const prismic = getPrismicClient();
-
   const { slug } = params;
 
-  const response: Post = await prismic.getByUID('post', String(slug), {});
+  const response = await prismic.getByUID('post', String(slug), {});
 
   const post = {
     uid: response.uid,
@@ -137,7 +173,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       subtitle: response.data.subtitle,
       author: response.data.author,
       banner: {
-        url: response.data.banner.url,
+        url: response.data.banner.url ?? '',
       },
       content: response.data.content.map(content => {
         return {
@@ -152,5 +188,6 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     props: {
       post,
     },
+    revalidate: 60 * 60 * 24, // 24 hours
   };
 };
