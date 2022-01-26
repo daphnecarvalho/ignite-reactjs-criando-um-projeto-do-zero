@@ -43,7 +43,7 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
           return {
             uid: post.uid,
             first_publication_date: String(
-              format(new Date(post.first_publication_date), 'dd MMMM yyyy', {
+              format(new Date(post.first_publication_date), 'dd MMM yyyy', {
                 locale: ptBR,
               })
             ),
@@ -120,7 +120,7 @@ export const getStaticProps: GetStaticProps = async () => {
     return {
       uid: post.uid,
       first_publication_date: String(
-        format(new Date(post.first_publication_date), 'dd MMMM yyyy', {
+        format(new Date(post.first_publication_date), 'dd MMM yyyy', {
           locale: ptBR,
         })
       ),
