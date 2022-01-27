@@ -44,8 +44,17 @@ interface PostProps {
 
 export default function Post({ post }: PostProps): JSX.Element {
   const router = useRouter();
+
   if (router.isFallback) {
     return <h1>Carregando...</h1>;
+  }
+
+  function formatDate(date: string): string {
+    return String(
+      format(new Date(date), 'dd MMM yyyy', {
+        locale: ptBR,
+      })
+    );
   }
 
   function calculateReadingTime(content: Content[]): string {
@@ -96,17 +105,7 @@ export default function Post({ post }: PostProps): JSX.Element {
             <div>
               <time>
                 <FiCalendar size={20} />
-                <span>
-                  {String(
-                    format(
-                      new Date(post.first_publication_date),
-                      'dd MMM yyyy',
-                      {
-                        locale: ptBR,
-                      }
-                    )
-                  )}
-                </span>
+                <span>{formatDate(post.first_publication_date)}</span>
               </time>
               <span>
                 <FiUser size={20} />

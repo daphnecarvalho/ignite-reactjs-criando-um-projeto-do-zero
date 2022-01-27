@@ -35,6 +35,14 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
   const [posts, setPosts] = useState(postsPagination.results);
   const [nextPage, setNextPage] = useState(postsPagination.next_page);
 
+  function formatDate(date: string): string {
+    return String(
+      format(new Date(date), 'dd MMM yyyy', {
+        locale: ptBR,
+      })
+    );
+  }
+
   async function loadMorePosts(): Promise<void> {
     fetch(nextPage)
       .then(response => response.json())
@@ -42,15 +50,11 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
         const dataPosts: Post[] = data.results.map(post => {
           return {
             uid: post.uid,
-            first_publication_date: String(
-              format(new Date(post.first_publication_date), 'dd MMM yyyy', {
-                locale: ptBR,
-              })
-            ),
+            first_publication_date: post.first_publication_date,
             data: {
-              title: RichText.asText(post.data.title),
-              subtitle: RichText.asText(post.data.subtitle),
-              author: RichText.asText(post.data.author),
+              title: post.data.title,
+              subtitle: post.data.subtitle,
+              author: post.data.author,
             },
           };
         });
@@ -78,7 +82,7 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
                   <div>
                     <time>
                       <FiCalendar size={20} />
-                      <span>{post.first_publication_date}</span>
+                      <span>{formatDate(post.first_publication_date)}</span>
                     </time>
                     <span>
                       <FiUser size={20} />
@@ -119,15 +123,11 @@ export const getStaticProps: GetStaticProps = async () => {
   const posts = postsResponse.results.map(post => {
     return {
       uid: post.uid,
-      first_publication_date: String(
-        format(new Date(post.first_publication_date), 'dd MMM yyyy', {
-          locale: ptBR,
-        })
-      ),
+      first_publication_date: post.first_publication_date,
       data: {
-        title: RichText.asText(post.data.title),
-        subtitle: RichText.asText(post.data.subtitle),
-        author: RichText.asText(post.data.author),
+        title: post.data.title,
+        subtitle: post.data.subtitle,
+        author: post.data.author,
       },
     };
   });
